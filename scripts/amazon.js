@@ -27,7 +27,7 @@ function generateHTML(product) {
           </div>
 
           <div class="product-quantity-container">
-            <select>
+            <select class="quantity-selector">
               <option selected value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -48,10 +48,44 @@ function generateHTML(product) {
             Added
           </div>
 
-          <button class="add-to-cart-button button-primary">
+          <button class="add-to-cart-button button-primary" data-product-id="${product.id}" data-product-name="${product.name}">
             Add to Cart
           </button>
         </div>`;
 
     htmlCode += html;
+}
+
+document.querySelectorAll('.add-to-cart-button').forEach((button) => addProductToCart(button));
+
+function addProductToCart (button) {
+    button.addEventListener('click', () => addProduct(button))
+}
+
+function addProduct (button) {
+    const cartQuantity = document.querySelector('.cart-quantity');
+    const productQuantity = button.closest('.product-container').querySelector('.quantity-selector');
+
+    const itemId = button.dataset.productId;
+    const itemName = button.dataset.productName;
+    let existItem;
+    let product = {productId: itemId, productName: itemName, quantity: Number(productQuantity.value)};
+    let totalQuantity = 0;
+
+    cart.forEach ((item) => {
+        if (itemId === item.productId) {
+            existItem = item;
+        }
+    });
+
+    if (existItem) {
+        existItem.quantity += product.quantity;
+    } else {
+        cart.push(product)
+    }
+
+    cart.forEach((item) => totalQuantity += item.quantity);
+    cartQuantity.innerHTML = `${totalQuantity}`;
+
+    console.log(cart)
 }
