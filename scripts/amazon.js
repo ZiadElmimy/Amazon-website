@@ -1,3 +1,6 @@
+import {cart} from '../data/cart.js';
+import {products} from '../data/products.js';
+
 let htmlCode = '';
 products.forEach((product) => generateHTML(product));
 
@@ -47,7 +50,6 @@ function generateHTML(product) {
             <img src="images/icons/checkmark.png">
             Added
           </div>
-
           <button class="add-to-cart-button button-primary" data-product-id="${product.id}" data-product-name="${product.name}">
             Add to Cart
           </button>
@@ -65,6 +67,10 @@ function addProductToCart (button) {
 function addProduct (button) {
     const cartQuantity = document.querySelector('.cart-quantity');
     const productQuantity = button.closest('.product-container').querySelector('.quantity-selector');
+    const addedIndicator = button.closest('.product-container').querySelector('.added-to-cart');
+
+    addedIndicator.classList.add('view-added');
+    setTimeout(() => {addedIndicator.classList.remove('view-added')}, 1000);
 
     const itemId = button.dataset.productId;
     const itemName = button.dataset.productName;
