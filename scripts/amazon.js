@@ -1,9 +1,10 @@
-import {addProduct} from '../data/cart.js';
+import {addProduct, getCartQuantity} from '../data/cart.js';
 import {products} from '../data/products.js';
 
 let htmlCode = '';
 products.forEach((product) => generateHTML(product));
 
+document.querySelector('.cart-quantity').innerHTML = getCartQuantity();
 document.querySelector('.products-grid').innerHTML = htmlCode;
 
 function generateHTML(product) {
