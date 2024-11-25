@@ -1,17 +1,17 @@
 import {addProduct, getCartQuantity} from '../data/cart.js';
 import {products} from '../data/products.js';
 
-let htmlCode = '';
-products.forEach((product) => generateHTML(product));
+let html = '';
+products.forEach((product) => html += generateHTML(product));
 
 document.querySelector('.cart-quantity').innerHTML = getCartQuantity();
-document.querySelector('.products-grid').innerHTML = htmlCode;
+document.querySelector('.products-grid').innerHTML = html;
 
 function generateHTML(product) {
-    let html = `<div class="product-container">
+    return `<div class="product-container">
           <div class="product-image-container">
             <img class="product-image"
-              src="${product.image}">
+              src="${product.image}" alt="product image">
           </div>
 
           <div class="product-name limit-text-to-2-lines">
@@ -20,7 +20,7 @@ function generateHTML(product) {
 
           <div class="product-rating-container">
             <img class="product-rating-stars"
-              src="images/ratings/rating-${product.rating.stars * 10}.png">
+              src="images/ratings/rating-${product.rating.stars * 10}.png" alt="rating of the product">
             <div class="product-rating-count link-primary">
               ${product.rating.count}
             </div>
@@ -48,15 +48,13 @@ function generateHTML(product) {
           <div class="product-spacer"></div>
 
           <div class="added-to-cart">
-            <img src="images/icons/checkmark.png">
+            <img src="images/icons/checkmark.png" alt="checkmark icon">
             Added
           </div>
           <button class="add-to-cart-button button-primary" data-product-id="${product.id}" data-product-name="${product.name}">
             Add to Cart
           </button>
         </div>`;
-
-    htmlCode += html;
 }
 
 document.querySelectorAll('.add-to-cart-button').forEach((button) => addProductToCart(button));

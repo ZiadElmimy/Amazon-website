@@ -37,3 +37,15 @@ export function getCartQuantity() {
 
     return totalQuantity;
 }
+
+export function removeFromCart(productId) {
+    let newCart = [];
+    cart.forEach((item) => {
+        if(item.productId !== productId) {
+            newCart.push(item);
+        }
+    });
+    cart = newCart;
+    localStorage.setItem('cartProducts', JSON.stringify(cart));
+    console.log(cart);
+}
