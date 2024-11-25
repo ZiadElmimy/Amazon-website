@@ -11,7 +11,7 @@ export function addProduct (button) {
     const itemId = button.dataset.productId;
     const itemName = button.dataset.productName;
     let existItem;
-    let product = {productId: itemId, productName: itemName, quantity: Number(productQuantity.value)};
+    let product = {productId: itemId, productName: itemName, quantity: Number(productQuantity.value), deliveryId: '1'};
 
     cart.forEach ((item) => {
         if (itemId === item.productId) {
