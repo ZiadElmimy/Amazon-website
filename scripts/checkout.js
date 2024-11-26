@@ -1,5 +1,5 @@
-import { cart, getCartQuantity, removeFromCart, updateDeliveryOption} from '../data/cart.js';
-import { products } from '../data/products.js';
+import {cart, getCartQuantity, removeFromCart, updateDeliveryOption} from '../data/cart.js';
+import {products} from '../data/products.js';
 import {deliveryOptions} from '../data/deliveryOptions.js';
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
 
@@ -42,14 +42,25 @@ function renderCartQuantity() {
     document.querySelector('.items-quantity').innerHTML = `${getCartQuantity()} items`;
 }
 
+function calculateDeliveryDay(deliveryId) {
+    let deliveryDelay = 0;
+
+    deliveryOptions.forEach((option) => {
+        if(option.id === deliveryId) {
+            deliveryDelay = option.deliveryDays;
+        }
+    });
+
+    const today = dayjs();
+    const delayTime = today.add(deliveryDelay, 'days');
+
+    return delayTime.format('dddd, MMM DD');
+}
+
 // Function to generate the whole checkout page
 function generateCheckout() {
     let productContainer = '';
     let existing = '';
-
-    const today = dayjs();
-    const delayTime = today.add(7, 'days');
-    const dateString = delayTime.format('dddd, MMM DD');
 
     cart.forEach((cartItem) => {
         products.forEach((item) => {
@@ -62,7 +73,7 @@ function generateCheckout() {
             data-product-id="${cartItem.productId}"
             data-delivery-option-id="${cartItem.deliveryId}">
             <div class="delivery-date">
-            Delivery date: ${dateString}
+            Delivery date: ${calculateDeliveryDay(cartItem.deliveryId)}
             </div>
 
             <div class="cart-item-details-grid">
@@ -108,21 +119,19 @@ function renderDeliveryOptions(cartItem) {
     let deliveryOption = '';
 
     deliveryOptions.forEach((option) => {
-        const today = dayjs();
-        const delayTime = today.add(option.deliveryDays, 'days');
-        const dateString = delayTime.format('dddd, MMM DD');
+        const date = calculateDeliveryDay(option.id);
 
         const deliveryPrice = option.priceCents === 0? 'Free' : `$${(option.priceCents / 100).toFixed(2)} -`;
         const isCkecked = cartItem.deliveryId === option.id;
 
         deliveryOption = `
                 <div class="delivery-option" data-delivery-option-id="${option.id}"
-                data-delivery-date="${dateString}">
+                data-delivery-date="${date}">
                   <input type="radio" ${isCkecked? 'checked' : ''} class="delivery-option-input"
                     name="delivery-option-${cartItem.productId}">
                   <div>
                     <div class="delivery-option-date">
-                      ${dateString}
+                      ${date}
                     </div>
                     <div class="delivery-option-price">
                       ${deliveryPrice} Shipping
