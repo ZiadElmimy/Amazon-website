@@ -3,105 +3,114 @@ import { products } from '../data/products.js';
 import {deliveryOptions} from '../data/deliveryOptions.js';
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
 
-// Function to generate and render the entire checkout page
-function generateCheckoutPage() {
-    let html = '';
+console.log(cart);
 
-    // Generate HTML for all cart items
-    cart.forEach((cartItem) => {
-        html += generateHTML(cartItem);
+// Render the checkout page for the first time
+let html = '';
+generateCheckout();
+document.querySelector('.order-summary').innerHTML = html;
+renderCartQuantity();
+
+// Delete a specific cart item for the checkout stage
+document.querySelectorAll('.delete-link').forEach((link) => {
+    link.addEventListener('click', () => {
+        let productId = link.closest('.cart-item-container').dataset.productId;
+        let container = link.closest('.cart-item-container');
+
+        removeFromCart(productId);
+        container.remove();
+        renderCartQuantity();
     });
+});
 
-    // Update the cart items container
-    document.querySelector('.order-summary').innerHTML = html;
-
-    // Update the number of items in the cart
+// Function to render the cart quantity
+function renderCartQuantity() {
     document.querySelector('.items-quantity').innerHTML = `${getCartQuantity()} items`;
+}
 
-    // Add event listeners for delete links
-    document.querySelectorAll('.delete-quantity-link').forEach((link) => {
-        link.addEventListener('click', () => {
-            const productId = link.dataset.productId;
-            removeFromCart(productId);
-            updateCart(); // Re-render the cart and update the quantity
+// Function to generate the whole checkout page
+function generateCheckout() {
+    let productContainer = '';
+    let existing = '';
+
+    cart.forEach((cartItem) => {
+        products.forEach((item) => {
+            if(item.id === cartItem.productId) {
+                existing = item;
+            }
         });
-    });
-}
 
-// Function to generate HTML for a single cart item
-function generateHTML(cartItem) {
-    let exists;
-    let quantity = 0;
-
-    products.forEach((product) => {
-        if (cartItem.productId === product.id) {
-            exists = product;
-            quantity = cartItem.quantity;
-        }
-    });
-
-    const deliveryOptionId = cartItem.deliveryId;
-    let deliveryOption;
-
-    deliveryOptions.forEach(option => {
-        if (deliveryOptionId === option.id) {
-            deliveryOption = option;
-        }
-    });
-
-    const today = dayjs();
-    const deliveryDate = today.add(deliveryOption.deliveryDays, 'days');
-    const dateString = deliveryDate.format('dddd, MMM DD');
-
-    return `
-        <div class="cart-item-container">
-            <div class="delivery-date">Delivery date: ${dateString}</div>
-            <div class="cart-item-details-grid">
-                <img class="product-image" src="${exists.image}" alt="product image">
-                <div class="cart-item-details">
-                    <div class="product-name">${exists.name}</div>
-                    <div class="product-price">$${(exists.priceCents / 100).toFixed(2)}</div>
-                    <div class="product-quantity">
-                        <span>Quantity: <span class="quantity-label">${quantity}</span></span>
-                        <span class="update-quantity-link link-primary">Update</span>
-                        <span class="delete-quantity-link link-primary" data-product-id="${exists.id}">Delete</span>
-                    </div>
-                </div>
-                <div class="delivery-options">
-                    <div class="delivery-options-title">Choose a delivery option:</div>
-                    ${generateDeliveryOption(exists, cartItem)}
-                </div>
+        productContainer = `<div class="cart-item-container cart-item-container-${cartItem.productId}" data-product-id="${cartItem.productId}">
+            <div class="delivery-date">
+              Delivery date: Wednesday, June 15
             </div>
-        </div>`;
+
+            <div class="cart-item-details-grid">
+              <img class="product-image"
+                src=${existing.image} alt="product image">
+
+              <div class="cart-item-details">
+                <div class="product-name">
+                  ${cartItem.productName}
+                </div>
+                <div class="product-price">
+                  $${(existing.priceCents / 100).toFixed(2)}
+                </div>
+                <div class="product-quantity">
+                  <span>
+                    Quantity: <span class="quantity-label">${cartItem.quantity}</span>
+                  </span>
+                  <span class="update-quantity-link link-primary">
+                    Update
+                  </span>
+                  <span class="delete-quantity-link link-primary delete-link">
+                    Delete
+                  </span>
+                </div>
+              </div>
+
+              <div class="delivery-options">
+                <div class="delivery-options-title">
+                  Choose a delivery option:
+                </div>
+                ${renderDeliveryOptions(cartItem)}
+              </div>
+            </div>
+          </div>`;
+
+        html += productContainer;
+    });
 }
 
-// Function to generate the delivery options for each item in the cart
-function generateDeliveryOption(exists, cartItem) {
-    let html = '';
+function renderDeliveryOptions(cartItem) {
+    let deliveryStructure = '';
+    let deliveryOption = '';
 
-    deliveryOptions.forEach((deliveryOption) => {
+    deliveryOptions.forEach((option) => {
         const today = dayjs();
-        const deliveryDate = today.add(deliveryOption.deliveryDays, 'days');
-        const dateString = deliveryDate.format('dddd, MMM DD');
-        const price = deliveryOption.priceCents === 0? 'Free' : `$${(deliveryOption.priceCents / 100).toFixed(2)} -`;
+        const delayTime = today.add(option.deliveryDays, 'days');
+        const dateString = delayTime.format('dddd, MMM DD');
 
-        const isCkecked = deliveryOption.id === cartItem.deliveryId? 'checked' : '';
-        html += `<div class="delivery-option">
-                        <input type="radio" ${isCkecked} class="delivery-option-input" name="delivery-option-1 ${exists.id}">
-                        <div>
-                            <div class="delivery-option-date">${dateString}</div>
-                            <div class="delivery-option-price">${price} Shipping</div>
-                        </div>
-                    </div>`
+        const deliveryPrice = option.priceCents === 0? 'Free' : `$${(option.priceCents / 100).toFixed(2)} -`;
+        const isCkecked = cartItem.deliveryId === option.id;
+
+        deliveryOption = `
+                <div class="delivery-option">
+                  <input type="radio" ${isCkecked? 'checked' : ''} class="delivery-option-input"
+                    name="delivery-option-${cartItem.productId}">
+                  <div>
+                    <div class="delivery-option-date">
+                      ${dateString}
+                    </div>
+                    <div class="delivery-option-price">
+                      ${deliveryPrice} Shipping
+                    </div>
+                  </div>
+                </div>`;
+
+        deliveryStructure += deliveryOption;
     });
 
-    return html;
+    console.log(deliveryStructure);
+    return deliveryStructure;
 }
-
-// Function to update the cart display
-function updateCart() {
-    generateCheckoutPage();
-}
-
-// Initial render on page load
-generateCheckoutPage();
