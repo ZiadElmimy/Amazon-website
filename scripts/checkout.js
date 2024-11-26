@@ -1,15 +1,13 @@
 import {cart, getCartQuantity, removeFromCart, updateDeliveryOption} from '../data/cart.js';
-import {products} from '../data/products.js';
-import {deliveryOptions} from '../data/deliveryOptions.js';
-import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
-
-console.log(cart);
+import {products, getProduct} from '../data/products.js';
+import {deliveryOptions, calculateDeliveryDay, getDeliveryOption} from '../data/deliveryOptions.js';
 
 // Render the checkout page for the first time
 let html = '';
 generateCheckout();
 document.querySelector('.order-summary').innerHTML = html;
 renderCartQuantity();
+renderPaymentSummary();
 
 // Delete a specific cart item for the checkout stage
 document.querySelectorAll('.delete-link').forEach((link) => {
@@ -20,41 +18,30 @@ document.querySelectorAll('.delete-link').forEach((link) => {
         removeFromCart(productId);
         container.remove();
         renderCartQuantity();
+
+        renderPaymentSummary();
     });
 });
 
+// update the delivery option for the product
 document.querySelectorAll('.delivery-option').forEach((option) => {
     let deliveryId;
     let productId = option.closest('.cart-item-container').dataset.productId;
     let deliveryOptionDate = option.dataset.deliveryDate;
     option.addEventListener('click', () => {
         deliveryId = option.dataset.deliveryOptionId;
-        console.log(`in the checkout page ${deliveryId}`);
         updateDeliveryOption(productId, deliveryId);
 
         option.closest('.cart-item-container').querySelector('.delivery-date')
             .innerHTML = `Delivery date: ${deliveryOptionDate}`;
+
+        renderPaymentSummary();
     });
 })
 
 // Function to render the cart quantity
 function renderCartQuantity() {
     document.querySelector('.items-quantity').innerHTML = `${getCartQuantity()} items`;
-}
-
-function calculateDeliveryDay(deliveryId) {
-    let deliveryDelay = 0;
-
-    deliveryOptions.forEach((option) => {
-        if(option.id === deliveryId) {
-            deliveryDelay = option.deliveryDays;
-        }
-    });
-
-    const today = dayjs();
-    const delayTime = today.add(deliveryDelay, 'days');
-
-    return delayTime.format('dddd, MMM DD');
 }
 
 // Function to generate the whole checkout page
@@ -142,6 +129,61 @@ function renderDeliveryOptions(cartItem) {
         deliveryStructure += deliveryOption;
     });
 
-    console.log(deliveryStructure);
     return deliveryStructure;
+}
+
+// Function to render the payment summary
+function renderPaymentSummary() {
+    const paymentSummary = document.querySelector('.payment-summary');
+
+    let productsCost = 0;
+    let shippingCost = 0;
+    let paymentHTML = '';
+
+    cart.forEach((cartItem) => {
+        const product = getProduct(cartItem);
+
+        productsCost += product.priceCents * cartItem.quantity;
+        shippingCost += getDeliveryOption(cartItem.deliveryId).priceCents;
+    })
+
+    const totalBeforeTax = productsCost + shippingCost;
+    const estimatedTax = totalBeforeTax * 0.1;
+    const totalCost = totalBeforeTax + estimatedTax;
+
+    paymentHTML = ` 
+          <div class="payment-summary-title">
+            Order Summary
+          </div>
+
+          <div class="payment-summary-row">
+            <div>Items (${getCartQuantity()}):</div>
+            <div class="payment-summary-money">$${(productsCost / 100).toFixed(2)}</div>
+          </div>
+
+          <div class="payment-summary-row">
+            <div>Shipping &amp; handling:</div>
+            <div class="payment-summary-money">$${(shippingCost / 100).toFixed(2)}</div>
+          </div>
+
+          <div class="payment-summary-row subtotal-row">
+            <div>Total before tax:</div>
+            <div class="payment-summary-money">$${(totalBeforeTax / 100).toFixed(2)}</div>
+          </div>
+
+          <div class="payment-summary-row">
+            <div>Estimated tax (10%):</div>
+            <div class="payment-summary-money">$${(estimatedTax / 100).toFixed(2)}</div>
+          </div>
+
+          <div class="payment-summary-row total-row">
+            <div>Order total:</div>
+            <div class="payment-summary-money">$${(totalCost / 100).toFixed(2)}</div>
+          </div>
+
+          <button class="place-order-button button-primary">
+            Place your order
+          </button>`
+
+    paymentSummary.innerHTML = paymentHTML;
 }

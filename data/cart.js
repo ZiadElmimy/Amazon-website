@@ -52,7 +52,7 @@ export function removeFromCart(productId) {
 
 export function updateDeliveryOption(productId, deliveryOptionId) {
     let existing;
-    console.log(`in the cart ${deliveryOptionId}`);
+
     cart.forEach ((item) => {
         if (productId === item.productId) {
             existing = item;
@@ -67,7 +67,5 @@ export function updateDeliveryOption(productId, deliveryOptionId) {
         }
     })
 
-    console.log('the updated cart...');
-    console.log(cart);
     localStorage.setItem('cartProducts', JSON.stringify(cart));
 }
