@@ -1,4 +1,4 @@
-import { cart, getCartQuantity, removeFromCart } from '../data/cart.js';
+import { cart, getCartQuantity, removeFromCart, updateDeliveryOption} from '../data/cart.js';
 import { products } from '../data/products.js';
 import {deliveryOptions} from '../data/deliveryOptions.js';
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
@@ -23,6 +23,20 @@ document.querySelectorAll('.delete-link').forEach((link) => {
     });
 });
 
+document.querySelectorAll('.delivery-option').forEach((option) => {
+    let deliveryId;
+    let productId = option.closest('.cart-item-container').dataset.productId;
+    let deliveryOptionDate = option.dataset.deliveryDate;
+    option.addEventListener('click', () => {
+        deliveryId = option.dataset.deliveryOptionId;
+        console.log(`in the checkout page ${deliveryId}`);
+        updateDeliveryOption(productId, deliveryId);
+
+        option.closest('.cart-item-container').querySelector('.delivery-date')
+            .innerHTML = `Delivery date: ${deliveryOptionDate}`;
+    });
+})
+
 // Function to render the cart quantity
 function renderCartQuantity() {
     document.querySelector('.items-quantity').innerHTML = `${getCartQuantity()} items`;
@@ -33,6 +47,10 @@ function generateCheckout() {
     let productContainer = '';
     let existing = '';
 
+    const today = dayjs();
+    const delayTime = today.add(7, 'days');
+    const dateString = delayTime.format('dddd, MMM DD');
+
     cart.forEach((cartItem) => {
         products.forEach((item) => {
             if(item.id === cartItem.productId) {
@@ -40,9 +58,11 @@ function generateCheckout() {
             }
         });
 
-        productContainer = `<div class="cart-item-container cart-item-container-${cartItem.productId}" data-product-id="${cartItem.productId}">
+        productContainer = `<div class="cart-item-container cart-item-container-${cartItem.productId}" 
+            data-product-id="${cartItem.productId}"
+            data-delivery-option-id="${cartItem.deliveryId}">
             <div class="delivery-date">
-              Delivery date: Wednesday, June 15
+            Delivery date: ${dateString}
             </div>
 
             <div class="cart-item-details-grid">
@@ -82,6 +102,7 @@ function generateCheckout() {
     });
 }
 
+// Function to render the delivery options for each product
 function renderDeliveryOptions(cartItem) {
     let deliveryStructure = '';
     let deliveryOption = '';
@@ -95,7 +116,8 @@ function renderDeliveryOptions(cartItem) {
         const isCkecked = cartItem.deliveryId === option.id;
 
         deliveryOption = `
-                <div class="delivery-option">
+                <div class="delivery-option" data-delivery-option-id="${option.id}"
+                data-delivery-date="${dateString}">
                   <input type="radio" ${isCkecked? 'checked' : ''} class="delivery-option-input"
                     name="delivery-option-${cartItem.productId}">
                   <div>
