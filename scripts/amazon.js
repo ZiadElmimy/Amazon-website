@@ -1,10 +1,10 @@
-import {addProduct, getCartQuantity} from '../data/cart.js';
+import {cart} from '../data/cart.js';
 import {products} from '../data/products.js';
 
 let html = '';
 products.forEach((product) => html += generateHTML(product));
 
-document.querySelector('.cart-quantity').innerHTML = getCartQuantity();
+document.querySelector('.cart-quantity').innerHTML = cart.getCartQuantity();
 document.querySelector('.products-grid').innerHTML = html;
 
 function generateHTML(product) {
@@ -60,5 +60,5 @@ function generateHTML(product) {
 document.querySelectorAll('.add-to-cart-button').forEach((button) => addProductToCart(button));
 
 function addProductToCart (button) {
-    button.addEventListener('click', () => addProduct(button))
+    button.addEventListener('click', () => cart.addProduct(button))
 }

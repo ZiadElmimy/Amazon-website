@@ -1,71 +1,76 @@
-export let cart = JSON.parse(localStorage.getItem('cartProducts')) || [];
+class Cart {
+    localStorageKey = 'cartProducts';
+    cartProducts = JSON.parse(localStorage.getItem(this.localStorageKey)) || [];
 
-export function addProduct (button) {
-    const productQuantity = button.closest('.product-container').querySelector('.quantity-selector');
-    const addedCheckmark = button.closest('.product-container').querySelector('.added-to-cart');
-    const cartQuantity = document.querySelector('.cart-quantity');
+    addProduct (button) {
+        const productQuantity = button.closest('.product-container').querySelector('.quantity-selector');
+        const addedCheckmark = button.closest('.product-container').querySelector('.added-to-cart');
+        const cartQuantity = document.querySelector('.cart-quantity');
 
-    addedCheckmark.classList.add('view-added');
-    setTimeout(() => {addedCheckmark.classList.remove('view-added')}, 1000);
+        addedCheckmark.classList.add('view-added');
+        setTimeout(() => {addedCheckmark.classList.remove('view-added')}, 1000);
 
-    const itemId = button.dataset.productId;
-    const itemName = button.dataset.productName;
-    let existItem;
-    let product = {productId: itemId, productName: itemName, quantity: Number(productQuantity.value), deliveryId: '1'};
+        const itemId = button.dataset.productId;
+        const itemName = button.dataset.productName;
+        let existItem;
+        let product = {productId: itemId, productName: itemName, quantity: Number(productQuantity.value), deliveryId: '1'};
 
-    cart.forEach ((item) => {
-        if (itemId === item.productId) {
-            existItem = item;
+        this.cartProducts.forEach ((item) => {
+            if (itemId === item.productId) {
+                existItem = item;
+            }
+        });
+
+        if (existItem) {
+            existItem.quantity += product.quantity;
+        } else {
+            this.cartProducts.push(product)
         }
-    });
 
-    if (existItem) {
-        existItem.quantity += product.quantity;
-    } else {
-        cart.push(product)
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.cartProducts));
+        cartQuantity.innerHTML = `${this.getCartQuantity()}`;
+
+        console.log(this.cartProducts)
     }
 
-    localStorage.setItem('cartProducts', JSON.stringify(cart));
-    cartQuantity.innerHTML = `${getCartQuantity()}`;
+    getCartQuantity() {
+        let totalQuantity = 0;
+        this.cartProducts.forEach((item) => totalQuantity += item.quantity);
 
-    console.log(cart)
+        return totalQuantity;
+    }
+
+    removeFromCart(productId) {
+        let newCart = [];
+        this.cartProducts.forEach((item) => {
+            if(item.productId !== productId) {
+                newCart.push(item);
+            }
+        });
+        this.cartProducts = newCart;
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.cartProducts));
+        console.log(this.cartProducts);
+    }
+
+    updateDeliveryOption(productId, deliveryOptionId) {
+        let existing;
+
+        this.cartProducts.forEach ((item) => {
+            if (productId === item.productId) {
+                existing = item;
+                existing.deliveryId = deliveryOptionId;
+            }
+
+        });
+
+        this.cartProducts.forEach ((item) => {
+            if(item.productId === existing.productId) {
+                item.deliveryId = existing.deliveryId;
+            }
+        })
+
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.cartProducts));
+    }
 }
 
-export function getCartQuantity() {
-    let totalQuantity = 0;
-    cart.forEach((item) => totalQuantity += item.quantity);
-
-    return totalQuantity;
-}
-
-export function removeFromCart(productId) {
-    let newCart = [];
-    cart.forEach((item) => {
-        if(item.productId !== productId) {
-            newCart.push(item);
-        }
-    });
-    cart = newCart;
-    localStorage.setItem('cartProducts', JSON.stringify(cart));
-    console.log(cart);
-}
-
-export function updateDeliveryOption(productId, deliveryOptionId) {
-    let existing;
-
-    cart.forEach ((item) => {
-        if (productId === item.productId) {
-            existing = item;
-            existing.deliveryId = deliveryOptionId;
-        }
-
-    });
-
-    cart.forEach ((item) => {
-        if(item.productId === existing.productId) {
-            item.deliveryId = existing.deliveryId;
-        }
-    })
-
-    localStorage.setItem('cartProducts', JSON.stringify(cart));
-}
+export const cart = new Cart();

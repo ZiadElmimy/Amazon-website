@@ -1,6 +1,7 @@
-import {cart, getCartQuantity, removeFromCart, updateDeliveryOption} from '../data/cart.js';
+import {cart} from '../data/cart.js';
 import {products, getProduct} from '../data/products.js';
 import {deliveryOptions, calculateDeliveryDay, getDeliveryOption} from '../data/deliveryOptions.js';
+
 
 // Render the checkout page for the first time
 let html = '';
@@ -15,7 +16,7 @@ document.querySelectorAll('.delete-link').forEach((link) => {
         let productId = link.closest('.cart-item-container').dataset.productId;
         let container = link.closest('.cart-item-container');
 
-        removeFromCart(productId);
+        cart.removeFromCart(productId);
         container.remove();
         renderCartQuantity();
 
@@ -30,7 +31,7 @@ document.querySelectorAll('.delivery-option').forEach((option) => {
     let deliveryOptionDate = option.dataset.deliveryDate;
     option.addEventListener('click', () => {
         deliveryId = option.dataset.deliveryOptionId;
-        updateDeliveryOption(productId, deliveryId);
+        cart.updateDeliveryOption(productId, deliveryId);
 
         option.closest('.cart-item-container').querySelector('.delivery-date')
             .innerHTML = `Delivery date: ${deliveryOptionDate}`;
@@ -41,7 +42,7 @@ document.querySelectorAll('.delivery-option').forEach((option) => {
 
 // Function to render the cart quantity
 function renderCartQuantity() {
-    document.querySelector('.items-quantity').innerHTML = `${getCartQuantity()} items`;
+    document.querySelector('.items-quantity').innerHTML = `${cart.getCartQuantity()} items`;
 }
 
 // Function to generate the whole checkout page
@@ -49,7 +50,7 @@ function generateCheckout() {
     let productContainer = '';
     let existing = '';
 
-    cart.forEach((cartItem) => {
+    cart.cartProducts.forEach((cartItem) => {
         products.forEach((item) => {
             if(item.id === cartItem.productId) {
                 existing = item;
@@ -140,7 +141,7 @@ function renderPaymentSummary() {
     let shippingCost = 0;
     let paymentHTML = '';
 
-    cart.forEach((cartItem) => {
+    cart.cartProducts.forEach((cartItem) => {
         const product = getProduct(cartItem);
 
         productsCost += product.priceCents * cartItem.quantity;
@@ -157,7 +158,7 @@ function renderPaymentSummary() {
           </div>
 
           <div class="payment-summary-row">
-            <div>Items (${getCartQuantity()}):</div>
+            <div>Items (${cart.getCartQuantity()}):</div>
             <div class="payment-summary-money">$${(productsCost / 100).toFixed(2)}</div>
           </div>
 
