@@ -73,7 +73,7 @@ function generateCheckout() {
                   ${cartItem.productName}
                 </div>
                 <div class="product-price">
-                  $${(existing.priceCents / 100).toFixed(2)}
+                  $${existing.getPrice()}
                 </div>
                 <div class="product-quantity">
                   <span>

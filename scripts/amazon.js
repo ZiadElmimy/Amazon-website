@@ -20,14 +20,14 @@ function generateHTML(product) {
 
           <div class="product-rating-container">
             <img class="product-rating-stars"
-              src="images/ratings/rating-${product.rating.stars * 10}.png" alt="rating of the product">
+              src=${product.getStarsImageUrl()} alt="rating of the product">
             <div class="product-rating-count link-primary">
               ${product.rating.count}
             </div>
           </div>
 
           <div class="product-price">
-            $${(product.priceCents / 100).toFixed(2)}
+            $${product.getPrice()}
           </div>
 
           <div class="product-quantity-container">
