@@ -44,6 +44,8 @@ function generateHTML(product) {
               <option value="10">10</option>
             </select>
           </div>
+          
+          <div>${product.extraInfo()}</div>
 
           <div class="product-spacer"></div>
 
