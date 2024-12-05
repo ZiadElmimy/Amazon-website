@@ -1,7 +1,14 @@
 import {cart} from '../data/cart.js';
 import {products, loadProducts} from '../data/products.js';
 
-loadProducts(renderProductsGrid);
+new Promise((resolve) => {
+    loadProducts(() => {
+        resolve();
+    });
+
+}).then(() => {
+    renderProductsGrid();
+})
 
 function renderProductsGrid() {
     let html = '';

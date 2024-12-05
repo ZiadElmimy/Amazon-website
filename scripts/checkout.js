@@ -2,7 +2,12 @@ import {cart} from '../data/cart.js';
 import {products, getProduct, loadProducts} from '../data/products.js';
 import {deliveryOptions, calculateDeliveryDay, getDeliveryOption} from '../data/deliveryOptions.js';
 
-loadProducts(() => {
+new Promise((resolve) => {
+    loadProducts(() => {
+        resolve();
+    });
+
+}).then(() => {
     // Render the checkout page for the first time
     let html = '';
     generateCheckout();
@@ -188,4 +193,5 @@ loadProducts(() => {
 
         paymentSummary.innerHTML = paymentHTML;
     }
+
 })
