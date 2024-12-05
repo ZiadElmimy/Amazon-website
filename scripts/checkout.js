@@ -1,63 +1,63 @@
 import {cart} from '../data/cart.js';
-import {products, getProduct} from '../data/products.js';
+import {products, getProduct, loadProducts} from '../data/products.js';
 import {deliveryOptions, calculateDeliveryDay, getDeliveryOption} from '../data/deliveryOptions.js';
 
+loadProducts(() => {
+    // Render the checkout page for the first time
+    let html = '';
+    generateCheckout();
+    document.querySelector('.order-summary').innerHTML = html;
+    renderCartQuantity();
+    renderPaymentSummary();
 
-// Render the checkout page for the first time
-let html = '';
-generateCheckout();
-document.querySelector('.order-summary').innerHTML = html;
-renderCartQuantity();
-renderPaymentSummary();
+    // Delete a specific cart item for the checkout stage
+    document.querySelectorAll('.delete-link').forEach((link) => {
+        link.addEventListener('click', () => {
+            let productId = link.closest('.cart-item-container').dataset.productId;
+            let container = link.closest('.cart-item-container');
 
-// Delete a specific cart item for the checkout stage
-document.querySelectorAll('.delete-link').forEach((link) => {
-    link.addEventListener('click', () => {
-        let productId = link.closest('.cart-item-container').dataset.productId;
-        let container = link.closest('.cart-item-container');
+            cart.removeFromCart(productId);
+            container.remove();
+            renderCartQuantity();
 
-        cart.removeFromCart(productId);
-        container.remove();
-        renderCartQuantity();
-
-        renderPaymentSummary();
-    });
-});
-
-// update the delivery option for the product
-document.querySelectorAll('.delivery-option').forEach((option) => {
-    let deliveryId;
-    let productId = option.closest('.cart-item-container').dataset.productId;
-    let deliveryOptionDate = option.dataset.deliveryDate;
-    option.addEventListener('click', () => {
-        deliveryId = option.dataset.deliveryOptionId;
-        cart.updateDeliveryOption(productId, deliveryId);
-
-        option.closest('.cart-item-container').querySelector('.delivery-date')
-            .innerHTML = `Delivery date: ${deliveryOptionDate}`;
-
-        renderPaymentSummary();
-    });
-})
-
-// Function to render the cart quantity
-function renderCartQuantity() {
-    document.querySelector('.items-quantity').innerHTML = `${cart.getCartQuantity()} items`;
-}
-
-// Function to generate the whole checkout page
-function generateCheckout() {
-    let productContainer = '';
-    let existing = '';
-
-    cart.cartProducts.forEach((cartItem) => {
-        products.forEach((item) => {
-            if(item.id === cartItem.productId) {
-                existing = item;
-            }
+            renderPaymentSummary();
         });
+    });
 
-        productContainer = `<div class="cart-item-container cart-item-container-${cartItem.productId}" 
+    // update the delivery option for the product
+    document.querySelectorAll('.delivery-option').forEach((option) => {
+        let deliveryId;
+        let productId = option.closest('.cart-item-container').dataset.productId;
+        let deliveryOptionDate = option.dataset.deliveryDate;
+        option.addEventListener('click', () => {
+            deliveryId = option.dataset.deliveryOptionId;
+            cart.updateDeliveryOption(productId, deliveryId);
+
+            option.closest('.cart-item-container').querySelector('.delivery-date')
+                .innerHTML = `Delivery date: ${deliveryOptionDate}`;
+
+            renderPaymentSummary();
+        });
+    })
+
+    // Function to render the cart quantity
+    function renderCartQuantity() {
+        document.querySelector('.items-quantity').innerHTML = `${cart.getCartQuantity()} items`;
+    }
+
+    // Function to generate the whole checkout page
+    function generateCheckout() {
+        let productContainer = '';
+        let existing = '';
+
+        cart.cartProducts.forEach((cartItem) => {
+            products.forEach((item) => {
+                if(item.id === cartItem.productId) {
+                    existing = item;
+                }
+            });
+
+            productContainer = `<div class="cart-item-container cart-item-container-${cartItem.productId}" 
             data-product-id="${cartItem.productId}"
             data-delivery-option-id="${cartItem.deliveryId}">
             <div class="delivery-date">
@@ -97,22 +97,22 @@ function generateCheckout() {
             </div>
           </div>`;
 
-        html += productContainer;
-    });
-}
+            html += productContainer;
+        });
+    }
 
-// Function to render the delivery options for each product
-function renderDeliveryOptions(cartItem) {
-    let deliveryStructure = '';
-    let deliveryOption = '';
+    // Function to render the delivery options for each product
+    function renderDeliveryOptions(cartItem) {
+        let deliveryStructure = '';
+        let deliveryOption = '';
 
-    deliveryOptions.forEach((option) => {
-        const date = calculateDeliveryDay(option.id);
+        deliveryOptions.forEach((option) => {
+            const date = calculateDeliveryDay(option.id);
 
-        const deliveryPrice = option.priceCents === 0? 'Free' : `$${(option.priceCents / 100).toFixed(2)} -`;
-        const isCkecked = cartItem.deliveryId === option.id;
+            const deliveryPrice = option.priceCents === 0? 'Free' : `$${(option.priceCents / 100).toFixed(2)} -`;
+            const isCkecked = cartItem.deliveryId === option.id;
 
-        deliveryOption = `
+            deliveryOption = `
                 <div class="delivery-option" data-delivery-option-id="${option.id}"
                 data-delivery-date="${date}">
                   <input type="radio" ${isCkecked? 'checked' : ''} class="delivery-option-input"
@@ -127,32 +127,32 @@ function renderDeliveryOptions(cartItem) {
                   </div>
                 </div>`;
 
-        deliveryStructure += deliveryOption;
-    });
+            deliveryStructure += deliveryOption;
+        });
 
-    return deliveryStructure;
-}
+        return deliveryStructure;
+    }
 
-// Function to render the payment summary
-function renderPaymentSummary() {
-    const paymentSummary = document.querySelector('.payment-summary');
+    // Function to render the payment summary
+    function renderPaymentSummary() {
+        const paymentSummary = document.querySelector('.payment-summary');
 
-    let productsCost = 0;
-    let shippingCost = 0;
-    let paymentHTML = '';
+        let productsCost = 0;
+        let shippingCost = 0;
+        let paymentHTML = '';
 
-    cart.cartProducts.forEach((cartItem) => {
-        const product = getProduct(cartItem);
+        cart.cartProducts.forEach((cartItem) => {
+            const product = getProduct(cartItem);
 
-        productsCost += product.priceCents * cartItem.quantity;
-        shippingCost += getDeliveryOption(cartItem.deliveryId).priceCents;
-    })
+            productsCost += product.priceCents * cartItem.quantity;
+            shippingCost += getDeliveryOption(cartItem.deliveryId).priceCents;
+        })
 
-    const totalBeforeTax = productsCost + shippingCost;
-    const estimatedTax = totalBeforeTax * 0.1;
-    const totalCost = totalBeforeTax + estimatedTax;
+        const totalBeforeTax = productsCost + shippingCost;
+        const estimatedTax = totalBeforeTax * 0.1;
+        const totalCost = totalBeforeTax + estimatedTax;
 
-    paymentHTML = ` 
+        paymentHTML = ` 
           <div class="payment-summary-title">
             Order Summary
           </div>
@@ -186,5 +186,6 @@ function renderPaymentSummary() {
             Place your order
           </button>`
 
-    paymentSummary.innerHTML = paymentHTML;
-}
+        paymentSummary.innerHTML = paymentHTML;
+    }
+})

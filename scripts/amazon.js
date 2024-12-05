@@ -1,14 +1,17 @@
 import {cart} from '../data/cart.js';
-import {products} from '../data/products.js';
+import {products, loadProducts} from '../data/products.js';
 
-let html = '';
-products.forEach((product) => html += generateHTML(product));
+loadProducts(renderProductsGrid);
 
-document.querySelector('.cart-quantity').innerHTML = cart.getCartQuantity();
-document.querySelector('.products-grid').innerHTML = html;
+function renderProductsGrid() {
+    let html = '';
+    products.forEach((product) => html += generateHTML(product));
 
-function generateHTML(product) {
-    return `<div class="product-container">
+    document.querySelector('.cart-quantity').innerHTML = cart.getCartQuantity();
+    document.querySelector('.products-grid').innerHTML = html;
+
+    function generateHTML(product) {
+        return `<div class="product-container">
           <div class="product-image-container">
             <img class="product-image"
               src="${product.image}" alt="product image">
@@ -57,10 +60,11 @@ function generateHTML(product) {
             Add to Cart
           </button>
         </div>`;
-}
+    }
 
-document.querySelectorAll('.add-to-cart-button').forEach((button) => addProductToCart(button));
+    document.querySelectorAll('.add-to-cart-button').forEach((button) => addProductToCart(button));
 
-function addProductToCart (button) {
-    button.addEventListener('click', () => cart.addProduct(button))
+    function addProductToCart(button) {
+        button.addEventListener('click', () => cart.addProduct(button))
+    }
 }
