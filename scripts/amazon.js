@@ -1,14 +1,9 @@
 import {cart} from '../data/cart.js';
-import {products, loadProducts} from '../data/products.js';
+import {products, loadProducts, loadProductsUsingFetch} from '../data/products.js';
 
-new Promise((resolve) => {
-    loadProducts(() => {
-        resolve();
-    });
-
-}).then(() => {
+loadProductsUsingFetch().then(() => {
     renderProductsGrid();
-})
+});
 
 function renderProductsGrid() {
     let html = '';
