@@ -1,6 +1,7 @@
 import {cart} from '../data/cart.js';
 import {products, getProduct, loadProducts, loadProductsUsingFetch} from '../data/products.js';
 import {deliveryOptions, calculateDeliveryDay, getDeliveryOption} from '../data/deliveryOptions.js';
+import {addOrder} from '../data/orders.js'
 
 loadProductsUsingFetch().then(() => {
     // Render the checkout page for the first time
@@ -39,6 +40,27 @@ loadProductsUsingFetch().then(() => {
             renderPaymentSummary();
         });
     })
+
+    document.querySelector('.place-order').addEventListener('click', async () => {
+        try {
+            const response = await fetch('https://supersimplebackend.dev/orders', {
+                method:'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cart: cart.cartProducts
+                })
+            });
+
+            const order = await response.json();
+            addOrder(order);
+        } catch (error) {
+            console.log(error);
+        }
+
+        window.location.href = 'orders.html';
+    });
 
     // Function to render the cart quantity
     function renderCartQuantity() {
@@ -182,7 +204,7 @@ loadProductsUsingFetch().then(() => {
         <div class="payment-summary-money">$${(totalCost / 100).toFixed(2)}</div>
       </div>
     
-      <button class="place-order-button button-primary">
+      <button class="place-order-button button-primary place-order">
         Place your order
       </button>`
 
