@@ -1,7 +1,7 @@
 import {cart} from '../data/cart.js';
 import {products, getProduct, loadProducts, loadProductsUsingFetch} from '../data/products.js';
 import {deliveryOptions, calculateDeliveryDay, getDeliveryOption} from '../data/deliveryOptions.js';
-import {addOrder} from '../data/orders.js'
+import {addOrder, getOrders} from '../data/orders.js'
 
 loadProductsUsingFetch().then(() => {
     // Render the checkout page for the first time
@@ -10,6 +10,7 @@ loadProductsUsingFetch().then(() => {
     document.querySelector('.order-summary').innerHTML = html;
     renderCartQuantity();
     renderPaymentSummary();
+    console.log(cart.cartProducts);
 
     // Delete a specific cart item for the checkout stage
     document.querySelectorAll('.delete-link').forEach((link) => {
@@ -59,6 +60,7 @@ loadProductsUsingFetch().then(() => {
             console.log(error);
         }
 
+        localStorage.removeItem('cartProducts');
         window.location.href = 'orders.html';
     });
 

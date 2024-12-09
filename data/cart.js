@@ -2,21 +2,14 @@ class Cart {
     localStorageKey = 'cartProducts';
     cartProducts = JSON.parse(localStorage.getItem(this.localStorageKey)) || [];
 
-    addProduct (button) {
-        const productQuantity = button.closest('.product-container').querySelector('.quantity-selector');
-        const addedCheckmark = button.closest('.product-container').querySelector('.added-to-cart');
-        const cartQuantity = document.querySelector('.cart-quantity');
-
-        addedCheckmark.classList.add('view-added');
-        setTimeout(() => {addedCheckmark.classList.remove('view-added')}, 1000);
-
-        const itemId = button.dataset.productId;
-        const itemName = button.dataset.productName;
+    storeProduct(productId, productName, productQuantity) {
         let existItem;
-        let product = {productId: itemId, productName: itemName, quantity: Number(productQuantity.value), deliveryId: '1'};
+
+        productQuantity = Number(productQuantity.value) || 1;
+        let product = {productId: productId, productName: productName, quantity: productQuantity, deliveryId: '1'};
 
         this.cartProducts.forEach ((item) => {
-            if (itemId === item.productId) {
+            if (productId === item.productId) {
                 existItem = item;
             }
         });
@@ -28,6 +21,19 @@ class Cart {
         }
 
         localStorage.setItem(this.localStorageKey, JSON.stringify(this.cartProducts));
+    }
+    addProduct(button) {
+        const productQuantity = button.closest('.product-container').querySelector('.quantity-selector');
+        const addedCheckmark = button.closest('.product-container').querySelector('.added-to-cart');
+        const cartQuantity = document.querySelector('.cart-quantity');
+
+        addedCheckmark.classList.add('view-added');
+        setTimeout(() => {addedCheckmark.classList.remove('view-added')}, 1000);
+
+        const itemId = button.dataset.productId;
+        const itemName = button.dataset.productName;
+
+        this.storeProduct(itemId, itemName, productQuantity);
         cartQuantity.innerHTML = `${this.getCartQuantity()}`;
 
         console.log(this.cartProducts)
