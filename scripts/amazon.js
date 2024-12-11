@@ -1,11 +1,9 @@
 import {cart} from '../data/cart.js';
 import {products, loadProducts, loadProductsUsingFetch} from '../data/products.js';
 
-loadProductsUsingFetch().then(() => {
-    renderProductsGrid();
-});
+async function renderProductsGrid() {
+    await loadProductsUsingFetch();
 
-function renderProductsGrid() {
     let html = '';
     products.forEach((product) => html += generateHTML(product));
 
@@ -70,3 +68,5 @@ function renderProductsGrid() {
         button.addEventListener('click', () => cart.addProduct(button))
     }
 }
+
+renderProductsGrid();
