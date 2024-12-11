@@ -73,7 +73,7 @@ function generateOrdersGrid() {
                     </div>
 
                     <div class="product-actions">
-                      <a href="tracking.html">
+                      <a href="tracking.html?productName=${existing.name}&productImage=${existing.image}&quantity=${orderItem.quantity}&deliveryDate=${getDate(orderItem.estimatedDeliveryTime)}">
                         <button class="track-package-button button-secondary">
                           Track package
                         </button>
